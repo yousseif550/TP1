@@ -6,13 +6,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.yousseif.todoyousseifissulahi.R
 
-class TaskListAdapter(private val taskList: List<Task>) : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
+object TasksDiffCallback : DiffUtil.ItemCallback<Task>() {
+    override fun areItemsTheSame(oldItem: Task, newItem: Task) = oldItem.id == newItem.id
 
-    // Déclaration de la variable lambda dans l'adapter:
+    override fun areContentsTheSame(oldItem: Task, newItem: Task) = oldItem == newItem
+}
+
+class TaskListAdapter() : ListAdapter<Task, TaskListAdapter.TaskViewHolder>(TasksDiffCallback) {
+
+
     var onDeleteTask: ((Task) -> Unit)? = null
+    var onEditTask: ((Task) -> Unit)? = null
+
 
     inner class TaskViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
@@ -25,9 +35,13 @@ class TaskListAdapter(private val taskList: List<Task>) : RecyclerView.Adapter<T
 
                 val imageButton = findViewById<ImageButton>(R.id.imageButton)
                 imageButton.setOnClickListener {
-                    // Utilisation de la lambda dans le ViewHolder:
                     onDeleteTask?.invoke(task)
                 }
+                val imageButtonEdit = findViewById<ImageButton>(R.id.imageButtonEdit)
+                imageButtonEdit.setOnClickListener {
+                    onEditTask?.invoke(task)
+                }
+
             }
         }
     }
@@ -37,12 +51,9 @@ class TaskListAdapter(private val taskList: List<Task>) : RecyclerView.Adapter<T
         return TaskViewHolder(itemView)
     }
 
-    override fun getItemCount(): Int {
-        return taskList.size
 
-    }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        holder.bind(taskList[position])
+        holder.bind(currentList[position])
     }
 }
